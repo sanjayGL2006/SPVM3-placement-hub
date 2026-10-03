@@ -1,0 +1,327 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  SUPER_ADMIN
+  PRINCIPAL
+  HOD
+  PLACEMENT_COORDINATOR
+  FACULTY
+  STUDENT
+  COMPANY_HR
+}
+
+enum PlacementStatus {
+  NOT_PLACED
+  APPLIED
+  SHORTLISTED
+  INTERVIEW
+  OFFERED
+  ACCEPTED
+  DECLINED
+  JOINED
+}
+
+enum DriveStatus {
+  DRAFT
+  UPCOMING
+  REGISTRATION_OPEN
+  REGISTRATION_CLOSED
+  ASSESSMENT
+  INTERVIEW
+  COMPLETED
+  CANCELLED
+}
+
+enum ApplicationStatus {
+  APPLIED
+  SHORTLISTED
+  ASSESSMENT
+  INTERVIEW
+  SELECTED
+  REJECTED
+  WAITLISTED
+  WITHDRAWN
+}
+
+model User {
+  id           Int      @id @default(autoincrement())
+  name         String
+  email        String   @unique
+  passwordHash String   @map("password_hash")
+  role         Role     @default(FACULTY)
+  departmentId Int?     @map("department_id")
+  courseId     Int?     @map("course_id")
+  avatarUrl    String?  @map("avatar_url")
+  isActive     Boolean  @default(true) @map("is_active")
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+
+  department   Department? @relation(fields: [departmentId], references: [id])
+  course       Course?     @relation(fields: [courseId], references: [id])
+  auditLogs    AuditLog[]
+  notifications Notification[]
+
+  @@map("users")
+}
+
+model Department {
+  id        Int      @id @default(autoincrement())
+  name      String   @unique
+  code      String?  @unique
+  createdAt DateTime @default(now()) @map("created_at")
+
+  courses   Course[]
+  students  Student[]
+  users     User[]
+
+  @@map("departments")
+}
+
+model Course {
+  id           Int     @id @default(autoincrement())
+  name         String
+  code         String?
+  stream       String?
+  departmentId Int?    @map("department_id")
+
+  department   Department? @relation(fields: [departmentId], references: [id], onDelete: Cascade)
+  students     Student[]
+  users        User[]
+
+  @@map("courses")
+}
+
+model Student {
+  id              Int             @id @default(autoincrement())
+  registerNumber  String          @unique @map("register_number")
+  name            String
+  email           String?         @unique
+  mobileNumber    String?         @map("mobile_number")
+  gender          String?
+  dateOfBirth     DateTime?       @map("date_of_birth") @db.Date
+  departmentId    Int?            @map("department_id")
+  courseId        Int?            @map("course_id")
+  section         String?
+  academicYear    String?         @map("academic_year")
+  batch           String?
+  semester        Int?            @default(6)
+  cgpa            Decimal?        @db.Decimal(4, 2)
+  percentage      Decimal?        @db.Decimal(5, 2)
+  backlogs        Int             @default(0)
+  skills          String?         // Comma-separated or JSON string
+  certifications  String?         // JSON string
+  projects        String?         // JSON string
+  resumeUrl       String?         @map("resume_url")
+  profilePhotoUrl String?         @map("profile_photo_url")
+  linkedinUrl     String?         @map("linkedin_url")
+  githubUrl       String?         @map("github_url")
+  portfolioUrl    String?         @map("portfolio_url")
+  placementStatus PlacementStatus @default(NOT_PLACED) @map("placement_status")
+  eligibleStatus  Boolean         @default(true) @map("eligible_status")
+  isDeleted       Boolean         @default(false) @map("is_deleted")
+  deletedAt       DateTime?       @map("deleted_at")
+  createdAt       DateTime        @default(now()) @map("created_at")
+  updatedAt       DateTime        @updatedAt @map("updated_at")
+
+  department   Department?     @relation(fields: [departmentId], references: [id])
+  course       Course?         @relation(fields: [courseId], references: [id])
+  placements   Placement[]
+  applications Application[]
+  documents    Document[]
+
+  @@index([registerNumber])
+  @@index([departmentId])
+  @@index([placementStatus])
+  @@index([isDeleted])
+  @@map("students")
+}
+
+model Company {
+  id                  Int       @id @default(autoincrement())
+  name                String
+  industry            String?
+  website             String?
+  location            String?
+  state               String?
+  description         String?
+  logoUrl             String?   @map("logo_url")
+  hrName              String?   @map("hr_name")
+  hrEmail             String?   @map("hr_email")
+  hrContactNumber     String?   @map("hr_contact_number")
+  jobRole             String?   @map("job_role")
+  packageAmount       Decimal?  @map("package_amount") @db.Decimal(12, 2)
+  minPackage          Decimal?  @map("min_package") @db.Decimal(12, 2)
+  maxPackage          Decimal?  @map("max_package") @db.Decimal(12, 2)
+  avgPackage          Decimal?  @map("avg_package") @db.Decimal(12, 2)
+  eligibleDepartments String?   @map("eligible_departments") // Comma-separated
+  minCgpa             Decimal?  @map("min_cgpa") @db.Decimal(4, 2)
+  allowedBacklogs     Int       @default(0) @map("allowed_backlogs")
+  requiredSkills      String?   @map("required_skills")
+  hiringCount         Int       @default(0) @map("hiring_count")
+  tier                String?   @default("Core") // Super Dream, Dream, Core, Mass
+  visitDate           DateTime? @map("visit_date") @db.Date
+  venue               String?
+  lastDate            DateTime? @map("last_date") @db.Date
+  isDeleted           Boolean   @default(false) @map("is_deleted")
+  deletedAt           DateTime? @map("deleted_at")
+  createdAt           DateTime  @default(now()) @map("created_at")
+  updatedAt           DateTime  @updatedAt @map("updated_at")
+
+  placements      Placement[]
+  drives          PlacementDrive[]
+
+  @@unique([name, visitDate])
+  @@index([name])
+  @@index([isDeleted])
+  @@map("companies")
+}
+
+model PlacementDrive {
+  id                  Int         @id @default(autoincrement())
+  companyId           Int         @map("company_id")
+  title               String
+  jobRole             String      @map("job_role")
+  jobDescription      String?     @map("job_description")
+  location            String?
+  packageAmount       Decimal?    @map("package_amount") @db.Decimal(12, 2)
+  minCgpa             Decimal?    @map("min_cgpa") @db.Decimal(4, 2)
+  allowedBacklogs     Int         @default(0) @map("allowed_backlogs")
+  eligibleDepartments String?     @map("eligible_departments")
+  requiredSkills      String?     @map("required_skills")
+  driveDate           DateTime    @map("drive_date") @db.Date
+  registrationDeadline DateTime?  @map("registration_deadline")
+  testDate            DateTime?   @map("test_date")
+  interviewDate       DateTime?   @map("interview_date")
+  vacancies           Int         @default(0)
+  selectionProcess    String?     @map("selection_process")
+  status              DriveStatus @default(UPCOMING)
+  isDeleted           Boolean     @default(false) @map("is_deleted")
+  deletedAt           DateTime?   @map("deleted_at")
+  createdAt           DateTime    @default(now()) @map("created_at")
+  updatedAt           DateTime    @updatedAt @map("updated_at")
+
+  company             Company       @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  applications        Application[]
+  calendarEvents      CalendarEvent[]
+
+  @@map("placement_drives")
+}
+
+model Application {
+  id              Int               @id @default(autoincrement())
+  driveId         Int               @map("drive_id")
+  studentId       Int               @map("student_id")
+  resumeUrl       String?           @map("resume_url")
+  status          ApplicationStatus @default(APPLIED)
+  notes           String?
+  interviewRound  Int?              @default(1) @map("interview_round")
+  createdAt       DateTime          @default(now()) @map("created_at")
+  updatedAt       DateTime          @updatedAt @map("updated_at")
+
+  drive           PlacementDrive    @relation(fields: [driveId], references: [id], onDelete: Cascade)
+  student         Student           @relation(fields: [studentId], references: [id], onDelete: Cascade)
+
+  @@unique([driveId, studentId])
+  @@map("applications")
+}
+
+model Placement {
+  id              Int       @id @default(autoincrement())
+  studentId       Int?      @map("student_id")
+  companyId       Int?      @map("company_id")
+  packageAmount   Decimal?  @map("package_amount") @db.Decimal(12, 2)
+  selectionDate   DateTime? @map("selection_date") @db.Date
+  offerStatus     String    @default("offered") @map("offer_status")
+  offerLetterUrl  String?   @map("offer_letter_url")
+  joiningDate     DateTime? @map("joining_date") @db.Date
+  createdAt       DateTime  @default(now()) @map("created_at")
+  updatedAt       DateTime  @updatedAt @map("updated_at")
+
+  student         Student?  @relation(fields: [studentId], references: [id])
+  company         Company?  @relation(fields: [companyId], references: [id])
+
+  @@map("placements")
+}
+
+model CalendarEvent {
+  id          Int       @id @default(autoincrement())
+  title       String
+  description String?
+  eventType   String    @map("event_type") // DRIVE, INTERVIEW, TEST, WORKSHOP, DEADLINE
+  startDate   DateTime  @map("start_date")
+  endDate     DateTime? @map("end_date")
+  location    String?
+  driveId     Int?      @map("drive_id")
+  departmentId Int?     @map("department_id")
+  createdAt   DateTime  @default(now()) @map("created_at")
+  updatedAt   DateTime  @updatedAt @map("updated_at")
+
+  drive       PlacementDrive? @relation(fields: [driveId], references: [id], onDelete: Cascade)
+
+  @@map("calendar_events")
+}
+
+model Notification {
+  id        Int      @id @default(autoincrement())
+  userId    Int?     @map("user_id")
+  title     String
+  message   String
+  type      String   @default("info") // info, success, warning, drive, interview
+  isRead    Boolean  @default(false) @map("is_read")
+  link      String?
+  createdAt DateTime @default(now()) @map("created_at")
+
+  user      User?    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("notifications")
+}
+
+model Document {
+  id          Int      @id @default(autoincrement())
+  studentId   Int?     @map("student_id")
+  title       String
+  docType     String   @map("doc_type") // RESUME, OFFER_LETTER, CERTIFICATE, ID_PROOF
+  fileUrl     String   @map("file_url")
+  fileSize    Int?     @map("file_size")
+  mimeType    String?  @map("mime_type")
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  student     Student? @relation(fields: [studentId], references: [id], onDelete: Cascade)
+
+  @@map("documents")
+}
+
+model AuditLog {
+  id        Int      @id @default(autoincrement())
+  userId    Int?     @map("user_id")
+  userEmail String?  @map("user_email")
+  action    String
+  entity    String
+  entityId  String?  @map("entity_id")
+  details   String?  // JSON string
+  ipAddress String?  @map("ip_address")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  user      User?    @relation(fields: [userId], references: [id])
+
+  @@map("audit_logs")
+}
+
+model RecycleBin {
+  id          Int      @id @default(autoincrement())
+  entityType  String   @map("entity_type") // STUDENT, COMPANY, DRIVE, USER
+  entityId    Int      @map("entity_id")
+  entityName  String   @map("entity_name")
+  payload     String   // Full JSON snapshot of deleted entity
+  deletedBy   String   @map("deleted_by")
+  deletedAt   DateTime @default(now()) @map("deleted_at")
+
+  @@map("recycle_bin")
+}

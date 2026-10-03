@@ -1,0 +1,1 @@
+{"name":"Placement Pro Backend API","version":"1.0.0","status":"online","health":"/api/health","frontendUrl":"http://localhost:5173","message":"Placement Pro API is running. To open the React Web Dashboard, navigate to http://localhost:5173 in your browser."}

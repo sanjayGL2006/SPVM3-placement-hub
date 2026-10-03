@@ -1,0 +1,111 @@
+services:
+  # ==========================================
+  # 1. PostgreSQL Relational Database
+  # ==========================================
+  postgres:
+    image: postgres:16-alpine
+    container_name: placement_postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-placement_admin}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-PlacementPass2026!}
+      POSTGRES_DB: ${POSTGRES_DB:-placement_pro_db}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./apps/backend_python/schema.sql:/docker-entrypoint-initdb.d/init.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-placement_admin} -d ${POSTGRES_DB:-placement_pro_db}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - placement_net
+
+  # ==========================================
+  # 2. Redis Caching & Rate Limiting
+  # ==========================================
+  redis:
+    image: redis:7-alpine
+    container_name: placement_redis
+    restart: unless-stopped
+    command: ["redis-server", "--appendonly", "yes", "--maxmemory", "256mb", "--maxmemory-policy", "allkeys-lru"]
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - placement_net
+
+  # ==========================================
+  # 3. Python FastAPI Backend Service
+  # ==========================================
+  backend:
+    build:
+      context: ./apps/backend_python
+      dockerfile: Dockerfile
+    container_name: placement_backend
+    restart: unless-stopped
+    environment:
+      DATABASE_URL: postgresql://${POSTGRES_USER:-placement_admin}:${POSTGRES_PASSWORD:-PlacementPass2026!}@postgres:5432/${POSTGRES_DB:-placement_pro_db}
+      REDIS_URL: redis://redis:6379/0
+      JWT_SECRET_KEY: ${JWT_SECRET_KEY:-super-secret-jwt-key-for-2026-production-placements}
+      ALGORITHM: HS256
+      ACCESS_TOKEN_EXPIRE_MINUTES: 1440
+      ENVIRONMENT: production
+    ports:
+      - "8000:8000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+    networks:
+      - placement_net
+
+  # ==========================================
+  # 4. React 19 Frontend Web SPA (Nginx)
+  # ==========================================
+  frontend:
+    build:
+      context: .
+      dockerfile: apps/web/Dockerfile
+    container_name: placement_frontend
+    restart: unless-stopped
+    ports:
+      - "80:80"
+    depends_on:
+      backend:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:80/healthz"]
+      interval: 20s
+      timeout: 5s
+      retries: 3
+    networks:
+      - placement_net
+
+# ==========================================
+# Volumes & Networks
+# ==========================================
+volumes:
+  postgres_data:
+    driver: local
+  redis_data:
+    driver: local
+
+networks:
+  placement_net:
+    driver: bridge

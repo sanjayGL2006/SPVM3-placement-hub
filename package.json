@@ -1,0 +1,30 @@
+{
+  "name": "placement-pro-monorepo",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "dev": "npm run dev --workspaces --parallel --if-present",
+    "dev:web": "npm run dev -w apps/web",
+    "dev:api": "npm run dev -w apps/api",
+    "build": "npm run build --workspaces --if-present",
+    "preview": "npm run preview -w apps/web",
+    "preview:web": "npm run preview -w apps/web",
+    "lint": "npm run lint --workspaces --if-present"
+  },
+  "devDependencies": {
+    "@capacitor/cli": "^8.5.2",
+    "@capacitor/core": "^8.5.2",
+    "@playwright/test": "^1.63.0",
+    "zod": "^4.6.5"
+  },
+  "optionalDependencies": {
+    "@esbuild/linux-x64": "^0.28.2",
+    "@rollup/rollup-linux-x64-gnu": "^4.63.3",
+    "@rollup/rollup-linux-x64-musl": "^4.63.3"
+  }
+}
