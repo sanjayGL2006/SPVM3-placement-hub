@@ -1,10 +1,9 @@
 [build]
   publish = "apps/web/dist"
-  command = "npm run build"
+  command = "npm install && npm run build"
 
 [build.environment]
   NODE_VERSION = "20"
-  NPM_FLAGS = "--include=optional"
 
 [[redirects]]
   from = "/*"
