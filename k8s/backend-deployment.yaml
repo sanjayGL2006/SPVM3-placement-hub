@@ -99,7 +99,6 @@ spec:
             httpGet:
               path: /health
               port: 8000
-            initialDelayDelaySeconds: 15
             initialDelaySeconds: 15
             periodSeconds: 10
             timeoutSeconds: 3

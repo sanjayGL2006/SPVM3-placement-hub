@@ -18,10 +18,8 @@ import { AnnualReportPage } from './features/reports/pages/AnnualReportPage';
 
 import { AiChatbotPage } from './features/ai-intelligence/pages/AiChatbotPage';
 import { ResumeAnalyzerPage } from './features/ai-intelligence/pages/ResumeAnalyzerPage';
-import { ResumeGeneratorPage } from './features/ai-intelligence/pages/ResumeGeneratorPage';
 import { SkillsGapPage } from './features/ai-intelligence/pages/SkillsGapPage';
 import { MockTestPage } from './features/ai-intelligence/pages/MockTestPage';
-import { MockInterviewPage } from './features/ai-intelligence/pages/MockInterviewPage';
 
 import { UsersPage } from './features/users/pages/UsersPage';
 import { SettingsPage } from './features/settings/pages/SettingsPage';
@@ -65,7 +63,7 @@ export const router = createBrowserRouter([
       {
         path: 'students',
         element: (
-          <ProtectedRoute allowedRoles={['principal', 'hod', 'coordinator', 'faculty']}>
+          <ProtectedRoute allowedRoles={['developer', 'principal', 'admin', 'hod', 'coordinator', 'faculty']}>
             <StudentDirectoryPage />
           </ProtectedRoute>
         ),
@@ -73,7 +71,7 @@ export const router = createBrowserRouter([
       {
         path: 'students/:id',
         element: (
-          <ProtectedRoute allowedRoles={['principal', 'hod', 'coordinator', 'faculty']}>
+          <ProtectedRoute allowedRoles={['developer', 'principal', 'admin', 'hod', 'coordinator', 'faculty']}>
             <StudentProfilePage />
           </ProtectedRoute>
         ),
@@ -81,7 +79,7 @@ export const router = createBrowserRouter([
       {
         path: 'companies',
         element: (
-          <ProtectedRoute allowedRoles={['principal', 'hod', 'coordinator', 'faculty']}>
+          <ProtectedRoute allowedRoles={['developer', 'principal', 'admin', 'hod', 'coordinator', 'faculty']}>
             <CompanyDirectoryPage />
           </ProtectedRoute>
         ),
@@ -89,7 +87,7 @@ export const router = createBrowserRouter([
       {
         path: 'companies/:id/drive',
         element: (
-          <ProtectedRoute allowedRoles={['principal', 'hod', 'coordinator', 'faculty']}>
+          <ProtectedRoute allowedRoles={['developer', 'principal', 'admin', 'hod', 'coordinator', 'faculty']}>
             <CompanyDriveDetailPage />
           </ProtectedRoute>
         ),
@@ -97,7 +95,7 @@ export const router = createBrowserRouter([
       {
         path: 'drives',
         element: (
-          <ProtectedRoute allowedRoles={['principal', 'hod', 'coordinator']}>
+          <ProtectedRoute allowedRoles={['developer', 'principal', 'admin', 'hod', 'coordinator']}>
             <PlacementDrivesPage />
           </ProtectedRoute>
         ),
@@ -105,7 +103,7 @@ export const router = createBrowserRouter([
       {
         path: 'placements',
         element: (
-          <ProtectedRoute allowedRoles={['principal', 'hod', 'coordinator', 'faculty', 'student']}>
+          <ProtectedRoute allowedRoles={['developer', 'principal', 'admin', 'hod', 'coordinator', 'faculty', 'student']}>
             <PlacementsPage />
           </ProtectedRoute>
         ),
@@ -113,7 +111,7 @@ export const router = createBrowserRouter([
       {
         path: 'reports',
         element: (
-          <ProtectedRoute allowedRoles={['principal', 'hod', 'coordinator', 'faculty']}>
+          <ProtectedRoute allowedRoles={['developer', 'principal', 'admin', 'hod', 'coordinator', 'faculty']}>
             <ReportsPage />
           </ProtectedRoute>
         ),
@@ -121,7 +119,7 @@ export const router = createBrowserRouter([
       {
         path: 'reports/annual',
         element: (
-          <ProtectedRoute allowedRoles={['principal', 'hod', 'coordinator']}>
+          <ProtectedRoute allowedRoles={['developer', 'principal', 'admin', 'hod', 'coordinator']}>
             <AnnualReportPage />
           </ProtectedRoute>
         ),
@@ -129,7 +127,7 @@ export const router = createBrowserRouter([
       {
         path: 'ai-chat',
         element: (
-          <ProtectedRoute allowedRoles={['principal', 'hod', 'coordinator', 'faculty', 'student']}>
+          <ProtectedRoute allowedRoles={['developer', 'principal', 'admin', 'hod', 'coordinator', 'faculty', 'student']}>
             <AiChatbotPage />
           </ProtectedRoute>
         ),
@@ -137,23 +135,19 @@ export const router = createBrowserRouter([
       {
         path: 'resume-analyzer',
         element: (
-          <ProtectedRoute allowedRoles={['principal', 'hod', 'coordinator', 'student']}>
+          <ProtectedRoute allowedRoles={['developer', 'principal', 'admin', 'hod', 'coordinator', 'student']}>
             <ResumeAnalyzerPage />
           </ProtectedRoute>
         ),
       },
       {
         path: 'resume-builder',
-        element: (
-          <ProtectedRoute allowedRoles={['principal', 'hod', 'coordinator', 'student']}>
-            <ResumeGeneratorPage />
-          </ProtectedRoute>
-        ),
+        element: <Navigate to="/resume-analyzer" replace />,
       },
       {
         path: 'skills-gap',
         element: (
-          <ProtectedRoute allowedRoles={['principal', 'hod', 'coordinator', 'student']}>
+          <ProtectedRoute allowedRoles={['developer', 'principal', 'admin', 'hod', 'coordinator', 'student']}>
             <SkillsGapPage />
           </ProtectedRoute>
         ),
@@ -161,23 +155,19 @@ export const router = createBrowserRouter([
       {
         path: 'mock-tests',
         element: (
-          <ProtectedRoute allowedRoles={['principal', 'hod', 'coordinator', 'student']}>
+          <ProtectedRoute allowedRoles={['developer', 'principal', 'admin', 'hod', 'coordinator', 'student']}>
             <MockTestPage />
           </ProtectedRoute>
         ),
       },
       {
         path: 'mock-interview',
-        element: (
-          <ProtectedRoute allowedRoles={['principal', 'hod', 'coordinator', 'student']}>
-            <MockInterviewPage />
-          </ProtectedRoute>
-        ),
+        element: <Navigate to="/dashboard" replace />,
       },
       {
         path: 'users',
         element: (
-          <ProtectedRoute allowedRoles={['principal', 'hod', 'coordinator', 'faculty', 'student']}>
+          <ProtectedRoute allowedRoles={['developer', 'principal', 'admin']}>
             <UsersPage />
           </ProtectedRoute>
         ),
@@ -185,7 +175,7 @@ export const router = createBrowserRouter([
       {
         path: 'settings',
         element: (
-          <ProtectedRoute allowedRoles={['principal', 'hod', 'coordinator', 'faculty', 'student']}>
+          <ProtectedRoute allowedRoles={['developer', 'principal', 'admin', 'hod', 'coordinator', 'faculty', 'student']}>
             <SettingsPage />
           </ProtectedRoute>
         ),
@@ -202,4 +192,3 @@ export const router = createBrowserRouter([
     ),
   },
 ]);
-

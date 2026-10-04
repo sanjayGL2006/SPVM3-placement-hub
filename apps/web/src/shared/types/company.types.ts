@@ -4,17 +4,21 @@ export type CompanyTier = 'Super Dream (> 12 LPA)' | 'Dream (7 - 12 LPA)' | 'Cor
 export type DriveStatus = 'Upcoming' | 'Ongoing' | 'Completed' | 'Cancelled';
 
 export type PipelineStage =
-  | 'Interested'
-  | 'Assigned'
+  | 'Applied'
   | 'Aptitude Test'
   | 'Technical Interview'
+  | 'HR Fit'
+  | 'Offer Letter Issued'
+  | 'Offer Accepted'
+  | 'Rejected'
+  | 'Interested'
+  | 'Assigned'
   | 'Group Discussion'
   | 'HR Round'
   | 'Selected'
-  | 'IR'
   | 'Offer Letter Request'
-  | 'Joined Company Request'
-  | 'Rejected';
+  | 'Joined Company Request';
+
 
 export type PipelineStatus =
   | 'Completed'

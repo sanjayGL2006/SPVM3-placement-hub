@@ -10,10 +10,8 @@ import {
   Sparkles,
   Bot,
   FileText,
-  Wand2,
   Target,
   Brain,
-  Video,
   Users,
   Settings,
   LogOut,
@@ -33,10 +31,10 @@ export const Sidebar: React.FC<SidebarProps> = ({ onCloseMobile, className }) =>
   const navigate = useNavigate();
 
   const isStudent = user?.role === 'student';
-  const isPrincipal = user?.role === 'principal';
+  const isSuperUser = user?.role === 'developer' || user?.role === 'principal' || user?.role === 'admin';
   const isFaculty = user?.role === 'faculty';
   const isHodOrCoord = user?.role === 'hod' || user?.role === 'coordinator';
-  const isStaff = isPrincipal || isHodOrCoord || isFaculty;
+  const isStaff = isSuperUser || isHodOrCoord || isFaculty;
 
   // 1. Core Operations
   const coreNavItems = [
@@ -55,25 +53,25 @@ export const Sidebar: React.FC<SidebarProps> = ({ onCloseMobile, className }) =>
         ]),
   ];
 
-  // 2. AI Intelligence Suite (Accessible across all roles)
+  // 2. AI Intelligence Suite (Accessible across all roles, deprecated items removed)
   const aiNavItems = [
     { name: 'AI Placement Chatbot', path: '/ai-chat', icon: Bot, highlight: true },
-    { name: 'ATS Resume Analyzer', path: '/resume-analyzer', icon: FileText },
-    { name: 'AI Resume Builder', path: '/resume-builder', icon: Wand2 },
+    { name: 'ATS Resume Analysis', path: '/resume-analyzer', icon: FileText },
     { name: 'Skills Gap Radar', path: '/skills-gap', icon: Target },
     { name: 'AI Mock Tests', path: '/mock-tests', icon: Brain },
-    { name: 'AI Mock Interview', path: '/mock-interview', icon: Video },
   ];
 
   // 3. Administration & Governance
   const adminNavItems = [
-    {
-      name: isPrincipal || isHodOrCoord
-        ? 'User & Security Controls'
-        : 'Security & Access Controls',
-      path: '/users',
-      icon: Users,
-    },
+    ...(isSuperUser
+      ? [
+          {
+            name: 'User & Security Controls',
+            path: '/users',
+            icon: Users,
+          },
+        ]
+      : []),
     { name: 'Settings & Profile', path: '/settings', icon: Settings },
   ];
 

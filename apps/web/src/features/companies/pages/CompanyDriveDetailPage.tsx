@@ -58,7 +58,7 @@ export const CompanyDriveDetailPage = () => {
 
   // Match company and drive
   const company = companies.find((c) => c.id === id) || companies[0];
-  const drive = drives.find((d) => d.companyId === company?.id || d.companyName === company?.name) || drives[0];
+  const drive = drives.find((d) => d.companyId === company?.id || d.companyName === company?.name) || null;
 
   const canManage = user?.role === 'principal' || user?.role === 'hod' || user?.role === 'coordinator';
   const canDelete = user?.role === 'principal';
@@ -67,10 +67,11 @@ export const CompanyDriveDetailPage = () => {
   const companyRoster = useMemo(() => {
     if (!company) return [];
 
-    // Filter pipeline candidates belonging to this company/drive
-    const directMatches = pipelineCandidates.filter(
-      (c) => c.companyId === company.id || c.driveId === drive?.id
-    );
+    // Filter pipeline candidates belonging to this specific drive, or just company if no drive exists
+    const directMatches = pipelineCandidates.filter((c) => {
+      if (drive) return c.driveId === drive.id;
+      return c.companyId === company.id;
+    });
 
     // Enrich with student master records if missing fields
     return directMatches.map((c) => {
@@ -91,12 +92,12 @@ export const CompanyDriveDetailPage = () => {
   // Dynamic Stage Counts
   const stageCounts = useMemo(() => {
     const counts = {
-      interested: company?.totalInterestedCount || 45,
+      interested: company?.totalInterestedCount || 0,
       assigned: companyRoster.length,
       aptitude: companyRoster.filter((c) => c.hiringStage === 'Aptitude Test').length,
       technical: companyRoster.filter((c) => c.hiringStage === 'Technical Interview').length,
       hr: companyRoster.filter((c) => c.hiringStage === 'HR Round').length,
-      selected: companyRoster.filter((c) => c.hiringStage === 'Selected' || c.hiringStage === 'IR').length,
+      selected: companyRoster.filter((c) => c.hiringStage === 'Offer Accepted' || c.hiringStage === 'Offer Letter Issued').length,
       rejected: companyRoster.filter((c) => c.hiringStage === 'Rejected' || c.offerLetterStatus === 'Rejected').length,
       offer_given: companyRoster.filter((c) => c.hiringStage === 'Offer Letter Request' || c.offerLetterStatus === 'Issued').length,
       joined: companyRoster.filter((c) => c.hiringStage === 'Joined Company Request' || c.offerLetterStatus === 'Joined').length,

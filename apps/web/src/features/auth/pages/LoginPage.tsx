@@ -73,9 +73,9 @@ export const LoginPage = () => {
 
     setIsLoading(true);
 
-    setTimeout(() => {
+    setTimeout(async () => {
       try {
-        const res = login(email, password);
+        const res = await login(email, password);
         setIsLoading(false);
 
         if (res.success) {

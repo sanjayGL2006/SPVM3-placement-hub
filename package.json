@@ -17,7 +17,7 @@
     "lint": "npm run lint --workspaces --if-present"
   },
   "devDependencies": {
-    "@capacitor/cli": "^8.5.2",
+    "@capacitor/cli": "^8.4.3",
     "@capacitor/core": "^8.5.2",
     "@playwright/test": "^1.63.0",
     "zod": "^4.6.5"
@@ -26,5 +26,10 @@
     "@esbuild/linux-x64": "^0.28.2",
     "@rollup/rollup-linux-x64-gnu": "^4.63.3",
     "@rollup/rollup-linux-x64-musl": "^4.63.3"
+  },
+  "dependencies": {
+    "@tailwindcss/postcss": "^4.3.3",
+    "jspdf": "4.2.1",
+    "tailwindcss": "4.3.3"
   }
 }

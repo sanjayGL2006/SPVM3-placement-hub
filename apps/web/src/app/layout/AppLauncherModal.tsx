@@ -10,10 +10,8 @@ import {
   FileSpreadsheet,
   Bot,
   FileText,
-  Wand2,
   Target,
   Brain,
-  Video,
   Users,
   Settings,
   Sparkles,
@@ -34,13 +32,13 @@ interface ModuleItem {
   icon: React.ElementType;
   badge?: string;
   badgeColor?: string;
-  roles?: string[];
   gradient: string;
 }
 
 export const AppLauncherModal: React.FC<AppLauncherModalProps> = ({ isOpen, onClose }) => {
   const navigate = useNavigate();
   const { user } = useAuthStore();
+  const isSuperUser = user?.role === 'developer' || user?.role === 'principal' || user?.role === 'admin';
 
   const handleNavigate = (path: string) => {
     navigate(path);
@@ -50,7 +48,7 @@ export const AppLauncherModal: React.FC<AppLauncherModalProps> = ({ isOpen, onCl
   const sections: { title: string; subtitle: string; items: ModuleItem[] }[] = [
     {
       title: 'AI Intelligence Suite',
-      subtitle: 'Next-gen AI engines powered for students & placement coordinators',
+      subtitle: 'Next-gen AI engines for students & placement coordinators',
       items: [
         {
           name: 'AI Placement Chatbot',
@@ -62,22 +60,13 @@ export const AppLauncherModal: React.FC<AppLauncherModalProps> = ({ isOpen, onCl
           gradient: 'from-indigo-500 to-purple-600',
         },
         {
-          name: 'ATS Resume Analyzer',
-          desc: 'Score resumes against job descriptions with AI keyword analysis',
+          name: 'ATS Resume Analysis',
+          desc: 'Score resumes against job descriptions with AI keyword matching',
           path: '/resume-analyzer',
           icon: FileText,
           badge: 'AI ENGINE',
           badgeColor: 'bg-purple-100 text-purple-700 dark:bg-purple-950 dark:text-purple-300',
           gradient: 'from-purple-500 to-pink-600',
-        },
-        {
-          name: 'AI Resume Builder',
-          desc: 'Generate single-column, high-scoring ATS resumes instantly',
-          path: '/resume-builder',
-          icon: Wand2,
-          badge: 'BUILDER',
-          badgeColor: 'bg-fuchsia-100 text-fuchsia-700 dark:bg-fuchsia-950 dark:text-fuchsia-300',
-          gradient: 'from-fuchsia-500 to-rose-600',
         },
         {
           name: 'Skills Gap Radar',
@@ -96,15 +85,6 @@ export const AppLauncherModal: React.FC<AppLauncherModalProps> = ({ isOpen, onCl
           badge: 'TEST ENGINE',
           badgeColor: 'bg-amber-100 text-amber-700 dark:bg-amber-950 dark:text-amber-300',
           gradient: 'from-amber-500 to-orange-600',
-        },
-        {
-          name: 'AI Mock Interview Coach',
-          desc: 'Simulate HR & Technical rounds with AI evaluation',
-          path: '/mock-interview',
-          icon: Video,
-          badge: 'INTERACTIVE',
-          badgeColor: 'bg-rose-100 text-rose-700 dark:bg-rose-950 dark:text-rose-300',
-          gradient: 'from-rose-500 to-red-600',
         },
       ],
     },
@@ -171,13 +151,17 @@ export const AppLauncherModal: React.FC<AppLauncherModalProps> = ({ isOpen, onCl
       title: 'Governance & Administration',
       subtitle: 'User access control, permissions & system settings',
       items: [
-        {
-          name: 'User & Security Controls',
-          desc: 'Role-based access management, faculty coordinators & security',
-          path: '/users',
-          icon: Users,
-          gradient: 'from-slate-600 to-stone-700',
-        },
+        ...(isSuperUser
+          ? [
+              {
+                name: 'User & Security Controls',
+                desc: 'Role-based access management, faculty coordinators & security',
+                path: '/users',
+                icon: Users,
+                gradient: 'from-slate-600 to-stone-700',
+              },
+            ]
+          : []),
         {
           name: 'System & Profile Settings',
           desc: 'Notification preferences, profile details & theme configuration',
@@ -211,9 +195,6 @@ export const AppLauncherModal: React.FC<AppLauncherModalProps> = ({ isOpen, onCl
                 </p>
               </div>
             </div>
-          </div>
-          <div className="text-[11px] font-medium text-stone-500 dark:text-stone-400 bg-stone-100 dark:bg-stone-800/60 px-3 py-1.5 rounded-full self-start sm:self-auto border border-stone-200/60 dark:border-stone-700/60">
-            14 Integrated Modules
           </div>
         </div>
 

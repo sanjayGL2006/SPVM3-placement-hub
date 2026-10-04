@@ -8,14 +8,16 @@ import {
   Sparkles,
   Bot,
   FileText,
-  Wand2,
   Target,
   Brain,
-  Video,
+  Users,
+  Settings,
+  FileSpreadsheet,
 } from 'lucide-react';
 import { Modal } from '../../shared/components/ui/Modal';
 import { useStudentStore } from '../../features/students/stores/studentStore';
 import { useCompanyStore } from '../../features/companies/stores/companyStore';
+import { useAuthStore } from '../../features/auth/stores/authStore';
 import { getCompanyLogo } from '../../shared/utils/companyLogos';
 
 export interface CommandPaletteProps {
@@ -26,6 +28,7 @@ export interface CommandPaletteProps {
 export const CommandPalette = ({ isOpen, onClose }: CommandPaletteProps) => {
   const [query, setQuery] = useState('');
   const navigate = useNavigate();
+  const { user } = useAuthStore();
   const { students, setSelectedStudent } = useStudentStore();
   const { companies, setSelectedCompany } = useCompanyStore();
 
@@ -41,41 +44,63 @@ export const CommandPalette = ({ isOpen, onClose }: CommandPaletteProps) => {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [isOpen, onClose]);
 
+  const isSuperUser = user?.role === 'developer' || user?.role === 'principal' || user?.role === 'admin';
+  const userDept = user?.department;
+
+  // Filter students based on role & department isolation
+  const visibleStudents = (students || []).filter((s: any) => {
+    if (user?.role === 'student') {
+      return s.email === user.email || s.id === user.id;
+    }
+    if (isSuperUser) return true;
+    if (userDept) {
+      return s.department === userDept || s.course?.includes(userDept);
+    }
+    return true;
+  });
+
   const filteredStudents = query
-    ? students
+    ? visibleStudents
         .filter(
           (s: any) =>
-            s.name.toLowerCase().includes(query.toLowerCase()) ||
-            s.registerNumber.toLowerCase().includes(query.toLowerCase()) ||
-            s.skills.some((sk: string) => sk.toLowerCase().includes(query.toLowerCase()))
+            s.name?.toLowerCase().includes(query.toLowerCase()) ||
+            s.registerNumber?.toLowerCase().includes(query.toLowerCase()) ||
+            s.skills?.some((sk: string) => sk.toLowerCase().includes(query.toLowerCase()))
         )
         .slice(0, 4)
     : [];
 
   const filteredCompanies = query
-    ? companies
+    ? (companies || [])
         .filter(
           (c: any) =>
-            c.name.toLowerCase().includes(query.toLowerCase()) ||
-            c.industry.toLowerCase().includes(query.toLowerCase())
+            c.name?.toLowerCase().includes(query.toLowerCase()) ||
+            c.industry?.toLowerCase().includes(query.toLowerCase())
         )
         .slice(0, 3)
     : [];
 
-  const quickNav = [
-    { title: 'Dashboard Overview', path: '/dashboard', icon: Sparkles, desc: 'Placement KPIs and visual analytics' },
-    { title: 'AI Placement Chatbot', path: '/ai-chat', icon: Bot, desc: 'Natural language placement intelligence assistant' },
-    { title: 'ATS Resume Analyzer', path: '/resume-analyzer', icon: FileText, desc: 'Score resumes & get keyword recommendations' },
-    { title: 'AI Resume Builder', path: '/resume-builder', icon: Wand2, desc: 'Single-column high-scoring PDF generator' },
-    { title: 'Skills Gap Radar', path: '/skills-gap', icon: Target, desc: 'Benchmark skills vs. top dream companies' },
-    { title: 'AI Mock Tests', path: '/mock-tests', icon: Brain, desc: 'Timed aptitude & CS practice test engine' },
-    { title: 'AI Mock Interview Coach', path: '/mock-interview', icon: Video, desc: 'Speech & text interview simulation' },
-    { title: 'Student Directory', path: '/students', icon: GraduationCap, desc: 'Manage 200+ student profiles and resumes' },
-    { title: 'Company Partners', path: '/companies', icon: Building2, desc: 'Partner hiring directory and packages' },
-    { title: 'Active Placement Drives', path: '/drives', icon: Calendar, desc: 'Drive calendar, registration deadlines & hiring rounds' },
-    { title: 'Placement Pipeline & Rounds', path: '/placements', icon: Calendar, desc: 'Selection stages and pipeline tracking' },
-    { title: 'Analytics & Reports', path: '/reports', icon: FileText, desc: 'Salary distribution, department comparisons & hiring trends' },
+  const allNavItems = [
+    { title: 'Dashboard Overview', path: '/dashboard', icon: Sparkles, desc: 'Placement KPIs and visual analytics', roles: ['all'] },
+    { title: 'AI Placement Chatbot', path: '/ai-chat', icon: Bot, desc: 'Natural language placement intelligence assistant', roles: ['all'] },
+    { title: 'ATS Resume Analysis', path: '/resume-analyzer', icon: FileText, desc: 'Score resumes & get keyword recommendations', roles: ['all'] },
+    { title: 'Skills Gap Radar', path: '/skills-gap', icon: Target, desc: 'Benchmark skills vs. top dream companies', roles: ['all'] },
+    { title: 'AI Mock Tests', path: '/mock-tests', icon: Brain, desc: 'Timed aptitude & CS practice test engine', roles: ['all'] },
+    { title: 'Student Directory', path: '/students', icon: GraduationCap, desc: 'Manage student profiles and resumes', roles: ['developer', 'principal', 'admin', 'hod', 'coordinator', 'faculty'] },
+    { title: 'Company Partners', path: '/companies', icon: Building2, desc: 'Partner hiring directory and packages', roles: ['developer', 'principal', 'admin', 'hod', 'coordinator', 'faculty'] },
+    { title: 'Active Placement Drives', path: '/drives', icon: Calendar, desc: 'Drive calendar, registration deadlines & hiring rounds', roles: ['developer', 'principal', 'admin', 'hod', 'coordinator'] },
+    { title: 'Placement Pipeline & Rounds', path: '/placements', icon: Calendar, desc: 'Selection stages and pipeline tracking', roles: ['all'] },
+    { title: 'Analytics & Reports', path: '/reports', icon: FileText, desc: 'Salary distribution & department comparisons', roles: ['developer', 'principal', 'admin', 'hod', 'coordinator', 'faculty'] },
+    { title: 'Annual Report', path: '/reports/annual', icon: FileSpreadsheet, desc: 'Institutional placement summary report', roles: ['developer', 'principal', 'admin', 'hod', 'coordinator'] },
+    { title: 'User & Security Controls', path: '/users', icon: Users, desc: 'Manage user roles and security logs', roles: ['developer', 'principal', 'admin'] },
+    { title: 'Settings & Profile', path: '/settings', icon: Settings, desc: 'Manage preferences & profile options', roles: ['all'] },
   ];
+
+  const quickNav = allNavItems.filter((item) => {
+    if (item.roles.includes('all')) return true;
+    if (isSuperUser) return true;
+    return user?.role && item.roles.includes(user.role);
+  });
 
   const handleNavigate = (path: string) => {
     navigate(path);
@@ -149,19 +174,19 @@ export const CommandPalette = ({ isOpen, onClose }: CommandPaletteProps) => {
                   >
                     <div className="flex items-center gap-3">
                       <div className="w-8 h-8 rounded-full bg-indigo-100 dark:bg-indigo-950/80 text-indigo-700 dark:text-indigo-300 font-bold text-xs flex items-center justify-center shrink-0">
-                        {s.name.split(' ').map((n: string) => n[0]).join('').slice(0, 2).toUpperCase()}
+                        {s.name?.split(' ').map((n: string) => n[0]).join('').slice(0, 2).toUpperCase()}
                       </div>
                       <div>
                         <div className="text-sm font-semibold text-stone-800 dark:text-stone-100">
                           {s.name}
                         </div>
                         <div className="text-xs text-stone-500">
-                          {s.course} · {s.registerNumber} · CGPA: {s.academic.cgpa}
+                          {s.course || s.department} · {s.registerNumber}
                         </div>
                       </div>
                     </div>
                     <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-indigo-50 dark:bg-indigo-950/40 text-indigo-600">
-                      {s.placement.status}
+                      {s.placement?.status || s.status || 'Active'}
                     </span>
                   </button>
                 ))}
@@ -201,9 +226,11 @@ export const CommandPalette = ({ isOpen, onClose }: CommandPaletteProps) => {
                         <div className="text-xs text-stone-500">{c.industry}</div>
                       </div>
                     </div>
-                    <span className="text-xs font-semibold text-stone-600 dark:text-stone-300">
-                      ₹{c.packageRange.min} - ₹{c.packageRange.max} LPA
-                    </span>
+                    {c.packageRange && (
+                      <span className="text-xs font-semibold text-stone-600 dark:text-stone-300">
+                        ₹{c.packageRange.min} - ₹{c.packageRange.max} LPA
+                      </span>
+                    )}
                   </button>
                 ))}
               </div>

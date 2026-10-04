@@ -1,4 +1,5 @@
-export type UserRole = 'principal' | 'hod' | 'coordinator' | 'faculty' | 'student';
+export type UserRole = 'developer' | 'principal' | 'admin' | 'hod' | 'coordinator' | 'faculty' | 'student';
+
 
 export type Department = 
   | 'Computer Applications'

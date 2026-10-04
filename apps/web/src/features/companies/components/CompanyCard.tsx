@@ -33,7 +33,7 @@ export const CompanyCard = ({
   };
 
   const avgPackage = company.avgPackage || Number(((company.packageRange.min + company.packageRange.max) / 2).toFixed(1));
-  const interestedCount = company.totalInterestedCount || 45;
+  const interestedCount = company.totalInterestedCount || 0;
 
   return (
     <div

@@ -134,7 +134,7 @@ export const CompanyDirectoryPage = () => {
       render: (c) => (
         <div className="flex items-center gap-1.5 text-xs font-semibold text-indigo-600 dark:text-indigo-400">
           <Users className="w-3.5 h-3.5" />
-          <span>{c.totalInterestedCount || 45} Candidates</span>
+          <span>{c.totalInterestedCount || 0} Candidates</span>
         </div>
       ),
     },

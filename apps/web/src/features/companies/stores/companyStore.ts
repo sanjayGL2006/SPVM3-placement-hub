@@ -62,7 +62,7 @@ const sanitizeCompanies = (companies: Company[]): Company[] => {
   return companies.map((c) => ({
     ...c,
     logo: getCompanyLogo(c.name, c.logo),
-    totalInterestedCount: c.totalInterestedCount || Math.floor(Math.random() * 40) + 35,
+    totalInterestedCount: c.totalInterestedCount || 0,
     avgPackage: c.avgPackage || Number(((c.packageRange.min + c.packageRange.max) / 2).toFixed(1)),
   }));
 };
@@ -222,7 +222,7 @@ export const useCompanyStore = create<CompanyState>()(
     (set, get) => ({
       companies: MOCK_COMPANIES.map((c) => ({
         ...c,
-        totalInterestedCount: c.totalInterestedCount || Math.floor(Math.random() * 30) + 40,
+        totalInterestedCount: c.totalInterestedCount || 0,
         avgPackage: c.avgPackage || Number(((c.packageRange.min + c.packageRange.max) / 2).toFixed(1)),
       })),
       drives: MOCK_DRIVES,
@@ -257,7 +257,7 @@ export const useCompanyStore = create<CompanyState>()(
           id,
           createdAt: timestamp,
           avgPackage: avg,
-          totalInterestedCount: data.totalInterestedCount || 45,
+          totalInterestedCount: data.totalInterestedCount || 0,
           logo: getCompanyLogo(data.name, data.logo),
         };
 
